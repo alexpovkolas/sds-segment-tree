@@ -3,4 +3,4 @@ project(ssd_problem2)
 
 set(CMAKE_CXX_STANDARD 14)
 
-add_executable(ssd_problem2 main.cpp)
+add_executable(ssd_problem2 main.cpp SegmentTree.cpp SegmentTree.h)
