@@ -5,7 +5,10 @@
 #include <vector>
 #include <math.h>
 #include <algorithm>
+#include <cstdio>
+#include <fstream>
 
+//#define __PROFILE__
 
 class SegmentTree {
 
@@ -17,7 +20,12 @@ class SegmentTree {
         int odd_count;
         int even_count;
         int value;
+
     public:
+#ifdef __PROFILE__
+        int left;
+        int right;
+#endif
 
         bool isLeaf;
         Node(): odd_sum(0), even_sum(0), odd_count(0), even_count(0), value(0), isLeaf(false) {}
@@ -42,6 +50,7 @@ class SegmentTree {
     void set_traversal(int index, int cur_l, int cur_r, int position, int value);
     Node make(int index);
     void push(int index);
+    int get_n();
 
 public:
     SegmentTree(const std::vector<int> items);
@@ -107,10 +116,22 @@ void SegmentTree::Node::set_value(int new_value) {
 
 SegmentTree::SegmentTree(const std::vector<int> items): items_size(items.size()), nodes( pow(2, ceil(log2(items.size())) + 1) ) {
     int k = nodes.size() / 2;
-    for (int i = 0; i < k ; ++i) {
-        int value = items.size() > i ?  items[i] : 0;
+    for (int i = 0; i < items.size() ; ++i) {
+        int value = items[i];
         nodes[i + k] = value % 2 == 1 ? Node(value, 0, 1, 0, value, true) : Node(0, value, 0, 1, value, true);
+#ifdef __PROFILE__
+        nodes[i + k].left = i;
+        nodes[i + k].right = i + 1;
+#endif
     }
+
+#ifdef __PROFILE__
+    for (int i = items.size(); i < nodes.size() / 2; ++i) {
+        nodes[i + k].left = i;
+        nodes[i + k].right = i + 1;
+    }
+#endif
+
 
     for (int i = k - 1; i > 0 ; --i) {
         nodes[i] = make(i);
@@ -118,19 +139,19 @@ SegmentTree::SegmentTree(const std::vector<int> items): items_size(items.size())
 }
 
 void SegmentTree::set(int index, int value) {
-    set_traversal(1, 0, items_size - 1, index, value);
+    set_traversal(1, 0, get_n(), index, value);
 }
 
 void SegmentTree::increment(int left, int right) {
-    inc_traversal(1, 0, items_size - 1, left, right);
+    inc_traversal(1, 0, get_n(), left, right);
 }
 
 int SegmentTree::odd_sum(int left, int right) {
-    return traversal(true, 1, 0, items_size - 1, left, right);;
+    return traversal(true, 1, 0, get_n(), left, right);;
 }
 
 int SegmentTree::even_sum(int left, int right) {
-    return traversal(false, 1, 0, items_size - 1, left, right);
+    return traversal(false, 1, 0, get_n(), left, right);
 }
 
 int SegmentTree::traversal(bool odd, int index, int cur_l, int cur_r, int l, int r) {
@@ -182,6 +203,10 @@ void SegmentTree::set_traversal(int index, int cur_l, int cur_r, int position, i
     nodes[index] = make(index);
 }
 
+int SegmentTree::get_n() {
+    return nodes.size() / 2 - 1;
+}
+
 void SegmentTree::push(int index) {
     Node current = nodes[index];
     if (current.get_value() != 0) {
@@ -200,8 +225,14 @@ SegmentTree::Node SegmentTree::make(int index) {
     if (!current.isLeaf) {
         Node left = nodes[index * 2];
         Node right = nodes[index * 2 + 1];
-        return Node(left.get_odd_sum() + right.get_odd_sum(), left.get_even_sum() + right.get_even_sum(),
+        Node result = Node(left.get_odd_sum() + right.get_odd_sum(), left.get_even_sum() + right.get_even_sum(),
                     left.get_odd_count() + right.get_odd_count(), left.get_even_count() + right.get_even_count(), current.get_value(), false);
+#ifdef __PROFILE__
+        result.left = left.left;
+        result.right = right.right;
+#endif
+
+        return result;
     } else {
         return current;
     }
@@ -217,6 +248,11 @@ struct Operation {
 } ;
 
 int main() {
+#ifdef __PROFILE__
+    ifstream in("input");
+    cin.rdbuf(in.rdbuf());
+#endif
+    
     int n = 0;
     int q = 0;
 
