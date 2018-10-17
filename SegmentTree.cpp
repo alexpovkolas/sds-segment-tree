@@ -49,12 +49,12 @@ void SegmentTree::Node::set_value(int new_value) {
             even_sum = new_value;
             odd_sum = 0;
             even_count = 1;
-            odd_sum = 0;
+            odd_count = 0;
         } else {
             even_sum = 0;
             odd_sum = new_value;
             even_count = 0;
-            odd_sum = 1;
+            odd_count = 1;
         }
     }
 }
@@ -145,6 +145,7 @@ void SegmentTree::push(int index) {
         nodes[left].set_value(nodes[left].get_value() + current.get_value());
         nodes[right].set_value(nodes[right].get_value() + current.get_value());
         nodes[index].set_value(0);
+        nodes[index] = make(index);
     }
 }
 
