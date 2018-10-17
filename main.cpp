@@ -4,7 +4,7 @@
 
 using namespace std;
 
-enum Actions {SET = 1, INCREMENT, ODD_SUM, EVENT_SUM};
+enum Actions {SET = 1, INCREMENT, EVENT_SUM, ODD_SUM};
 struct Operation {
     int action;
     int first_arg;
@@ -35,15 +35,17 @@ int main() {
         Operation operation = operations[j];
         switch (operation.action) {
             case SET:
-                tree.set(operation.first_arg, operation.second_arg);
+                tree.set(operation.first_arg - 1, operation.second_arg);
                 break;
             case INCREMENT:
-                tree.increment(operation.first_arg, operation.second_arg);
+                tree.increment(operation.first_arg - 1, operation.second_arg - 1);
                 break;
             case ODD_SUM:
-                cout << tree.odd_sum(operation.first_arg, operation.second_arg);
+                cout << tree.odd_sum(operation.first_arg - 1, operation.second_arg - 1) << std::endl;
+                break;
             case EVENT_SUM:
-                cout << tree.even_sum(operation.first_arg, operation.second_arg);
+                cout << tree.even_sum(operation.first_arg - 1, operation.second_arg - 1) << std::endl;
+                break;
         }
     }
 
