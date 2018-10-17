@@ -8,18 +8,20 @@
 #include <cstdio>
 #include <fstream>
 
-//#define __PROFILE__
+#define __PROFILE__
+
+typedef long VALUE_TYPE;
 
 class SegmentTree {
 
     // TODO: check if clean up possible
     struct Node {
     private:
-        int odd_sum;
-        int even_sum;
+        VALUE_TYPE odd_sum;
+        VALUE_TYPE even_sum;
         int odd_count;
         int even_count;
-        int value;
+        VALUE_TYPE value;
 
     public:
 #ifdef __PROFILE__
@@ -30,16 +32,16 @@ class SegmentTree {
         bool isLeaf;
         Node(): odd_sum(0), even_sum(0), odd_count(0), even_count(0), value(0), isLeaf(false) {}
 
-        Node(int odd_sum, int even_sum, int odd_count, int even_count, int value, bool isLeaf) :
+        Node(VALUE_TYPE odd_sum, VALUE_TYPE even_sum, int odd_count, int even_count, VALUE_TYPE value, bool isLeaf) :
                 odd_sum(odd_sum), even_sum(even_sum), odd_count(odd_count), even_count(even_count), value(value), isLeaf(isLeaf) {}
 
-        int get_odd_sum();
-        int get_even_sum();
+        VALUE_TYPE get_odd_sum();
+        VALUE_TYPE get_even_sum();
         int get_odd_count();
         int get_even_count();
 
-        int get_value();
-        void set_value(int new_value);
+        VALUE_TYPE get_value();
+        void set_value(VALUE_TYPE VALUE_TYPE);
     };
 
     int items_size;
@@ -47,14 +49,14 @@ class SegmentTree {
 
     int traversal(bool odd, int index, int cur_l, int cur_r, int l, int r);
     void inc_traversal(int index, int cur_l, int cur_r, int l, int r);
-    void set_traversal(int index, int cur_l, int cur_r, int position, int value);
+    void set_traversal(int index, int cur_l, int cur_r, int position, VALUE_TYPE value);
     Node make(int index);
     void push(int index);
     int get_n();
 
 public:
     SegmentTree(const std::vector<int> items);
-    void set(int index, int value);
+    void set(int index, VALUE_TYPE value);
     void increment(int left, int right);
     int odd_sum(int left, int right);
     int even_sum(int left, int right);
@@ -77,7 +79,7 @@ int SegmentTree::Node::get_odd_count() {
     }
 }
 
-int SegmentTree::Node::get_even_sum() {
+VALUE_TYPE SegmentTree::Node::get_even_sum() {
     if (isLeaf || value == 0) {
         return even_sum;
     } else {
@@ -85,7 +87,7 @@ int SegmentTree::Node::get_even_sum() {
     }
 }
 
-int SegmentTree::Node::get_odd_sum() {
+VALUE_TYPE SegmentTree::Node::get_odd_sum() {
     if (isLeaf || value == 0) {
         return odd_sum;
     } else {
@@ -93,11 +95,11 @@ int SegmentTree::Node::get_odd_sum() {
     }
 }
 
-int SegmentTree::Node::get_value() {
+VALUE_TYPE SegmentTree::Node::get_value() {
     return value;
 }
 
-void SegmentTree::Node::set_value(int new_value) {
+void SegmentTree::Node::set_value(VALUE_TYPE new_value) {
     value = new_value;
     if (isLeaf) {
         if (new_value % 2 == 0) {
@@ -138,7 +140,7 @@ SegmentTree::SegmentTree(const std::vector<int> items): items_size(items.size())
     }
 }
 
-void SegmentTree::set(int index, int value) {
+void SegmentTree::set(int index, VALUE_TYPE value) {
     set_traversal(1, 0, get_n(), index, value);
 }
 
@@ -186,7 +188,7 @@ void SegmentTree::inc_traversal(int index, int cur_l, int cur_r, int l, int r) {
     nodes[index] = make(index);
 }
 
-void SegmentTree::set_traversal(int index, int cur_l, int cur_r, int position, int value) {
+void SegmentTree::set_traversal(int index, int  cur_l, int cur_r, int position, VALUE_TYPE value) {
     if (cur_l == cur_r) {
         nodes[index].set_value(value);
         return;
@@ -252,7 +254,7 @@ int main() {
     ifstream in("input");
     cin.rdbuf(in.rdbuf());
 #endif
-    
+
     int n = 0;
     int q = 0;
 
