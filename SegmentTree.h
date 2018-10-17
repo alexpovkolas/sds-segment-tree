@@ -16,10 +16,10 @@ class SegmentTree {
         int even_sum;
         int odd_count;
         int even_count;
-    public:
         int value;
-        bool isLeaf;
+    public:
 
+        bool isLeaf;
         Node(): odd_sum(0), even_sum(0), odd_count(0), even_count(0), value(0), isLeaf(false) {}
 
         Node(int odd_sum, int even_sum, int odd_count, int even_count, int value, bool isLeaf) :
@@ -29,6 +29,9 @@ class SegmentTree {
         int get_even_sum();
         int get_odd_count();
         int get_even_count();
+
+        int get_value();
+        void set_value(int new_value);
     };
 
     int items_size;

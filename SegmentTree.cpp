@@ -39,6 +39,26 @@ int SegmentTree::Node::get_odd_sum() {
 
 }
 
+int SegmentTree::Node::get_value() {
+    return value;
+}
+void SegmentTree::Node::set_value(int new_value) {
+    value = new_value;
+    if (isLeaf) {
+        if (new_value % 2 == 0) {
+            even_sum = new_value;
+            odd_sum = 0;
+            even_count = 1;
+            odd_sum = 0;
+        } else {
+            even_sum = 0;
+            odd_sum = new_value;
+            even_count = 0;
+            odd_sum = 1;
+        }
+    }
+}
+
 SegmentTree::SegmentTree(const std::vector<int> items): items_size(items.size()), nodes( pow(2, ceil(log2(items.size())) + 1) ) {
     int k = nodes.size() / 2;
     for (int i = 0; i < k ; ++i) {
@@ -85,9 +105,7 @@ void SegmentTree::inc_traversal(int index, int cur_l, int cur_r, int l, int r) {
         return;
 
     if (cur_l == l && cur_r == r) {
-        nodes[index].value++;
-        if (nodes[index].isLeaf)
-            nodes[index] = make(index);
+        nodes[index].set_value(nodes[index].get_value() + 1);
         return;
     }
 
@@ -103,8 +121,7 @@ void SegmentTree::inc_traversal(int index, int cur_l, int cur_r, int l, int r) {
 
 void SegmentTree::set_traversal(int index, int cur_l, int cur_r, int position, int value) {
     if (cur_l == cur_r) {
-        nodes[index].value = value;
-        nodes[index] = make(index);
+        nodes[index].set_value(value);
         return;
     }
 
@@ -121,21 +138,24 @@ void SegmentTree::set_traversal(int index, int cur_l, int cur_r, int position, i
 
 void SegmentTree::push(int index) {
     Node current = nodes[index];
-    if (current.value != 0) {
-        nodes[index * 2].value += current.value;
-        nodes[index * 2 + 1].value += current.value;
-        nodes[index].value = 0;
+    if (current.get_value() != 0) {
+        int left = index * 2;
+        int right = index * 2 + 1;
+
+        nodes[left].set_value(nodes[left].get_value() + current.get_value());
+        nodes[right].set_value(nodes[right].get_value() + current.get_value());
+        nodes[index].set_value(0);
     }
 }
 
 SegmentTree::Node SegmentTree::make(int index) {
     Node current = nodes[index];
-    if (current.isLeaf) {
-        return current.value % 2 == 1 ? Node(current.value, 0, 1, 0, current.value, true) : Node(0, current.value, 0, 1, current.value, true);
-    } else {
+    if (!current.isLeaf) {
         Node left = nodes[index * 2];
         Node right = nodes[index * 2 + 1];
         return Node(left.get_odd_sum() + right.get_odd_sum(), left.get_even_sum() + right.get_even_sum(),
-                    left.get_odd_count() + right.get_odd_count(), left.get_even_count() + right.get_even_count(), current.value, false);
+                    left.get_odd_count() + right.get_odd_count(), left.get_even_count() + right.get_even_count(), current.get_value(), false);
+    } else {
+        return current;
     }
 }
