@@ -10,7 +10,7 @@
 
 #define __PROFILE__
 
-typedef long VALUE_TYPE;
+typedef long long VALUE_TYPE;
 
 class SegmentTree {
 
@@ -30,35 +30,50 @@ class SegmentTree {
 #endif
 
         bool isLeaf;
-        Node(): odd_sum(0), even_sum(0), odd_count(0), even_count(0), value(0), isLeaf(false) {}
+
+        Node() : odd_sum(0), even_sum(0), odd_count(0), even_count(0), value(0), isLeaf(false) {}
 
         Node(VALUE_TYPE odd_sum, VALUE_TYPE even_sum, int odd_count, int even_count, VALUE_TYPE value, bool isLeaf) :
-                odd_sum(odd_sum), even_sum(even_sum), odd_count(odd_count), even_count(even_count), value(value), isLeaf(isLeaf) {}
+                odd_sum(odd_sum), even_sum(even_sum), odd_count(odd_count), even_count(even_count), value(value),
+                isLeaf(isLeaf) {}
 
         VALUE_TYPE get_odd_sum();
+
         VALUE_TYPE get_even_sum();
+
         int get_odd_count();
+
         int get_even_count();
 
         VALUE_TYPE get_value();
-        void set_value(VALUE_TYPE VALUE_TYPE);
+
+        void set_value(VALUE_TYPE value);
     };
 
     int items_size;
     std::vector<Node> nodes;
 
     int traversal(bool odd, int index, int cur_l, int cur_r, int l, int r);
+
     void inc_traversal(int index, int cur_l, int cur_r, int l, int r);
+
     void set_traversal(int index, int cur_l, int cur_r, int position, VALUE_TYPE value);
+
     Node make(int index);
+
     void push(int index);
+
     int get_n();
 
 public:
     SegmentTree(const std::vector<int> items);
+
     void set(int index, VALUE_TYPE value);
+
     void increment(int left, int right);
+
     int odd_sum(int left, int right);
+
     int even_sum(int left, int right);
 
 };
@@ -116,9 +131,10 @@ void SegmentTree::Node::set_value(VALUE_TYPE new_value) {
     }
 }
 
-SegmentTree::SegmentTree(const std::vector<int> items): items_size(items.size()), nodes( pow(2, ceil(log2(items.size())) + 1) ) {
+SegmentTree::SegmentTree(const std::vector<int> items) : items_size(items.size()),
+                                                         nodes(pow(2, ceil(log2(items.size())) + 1)) {
     int k = nodes.size() / 2;
-    for (int i = 0; i < items.size() ; ++i) {
+    for (int i = 0; i < items.size(); ++i) {
         int value = items[i];
         nodes[i + k] = value % 2 == 1 ? Node(value, 0, 1, 0, value, true) : Node(0, value, 0, 1, value, true);
 #ifdef __PROFILE__
@@ -135,7 +151,7 @@ SegmentTree::SegmentTree(const std::vector<int> items): items_size(items.size())
 #endif
 
 
-    for (int i = k - 1; i > 0 ; --i) {
+    for (int i = k - 1; i > 0; --i) {
         nodes[i] = make(i);
     }
 }
@@ -188,7 +204,7 @@ void SegmentTree::inc_traversal(int index, int cur_l, int cur_r, int l, int r) {
     nodes[index] = make(index);
 }
 
-void SegmentTree::set_traversal(int index, int  cur_l, int cur_r, int position, VALUE_TYPE value) {
+void SegmentTree::set_traversal(int index, int cur_l, int cur_r, int position, VALUE_TYPE value) {
     if (cur_l == cur_r) {
         nodes[index].set_value(value);
         return;
@@ -228,7 +244,8 @@ SegmentTree::Node SegmentTree::make(int index) {
         Node left = nodes[index * 2];
         Node right = nodes[index * 2 + 1];
         Node result = Node(left.get_odd_sum() + right.get_odd_sum(), left.get_even_sum() + right.get_even_sum(),
-                    left.get_odd_count() + right.get_odd_count(), left.get_even_count() + right.get_even_count(), current.get_value(), false);
+                           left.get_odd_count() + right.get_odd_count(), left.get_even_count() + right.get_even_count(),
+                           current.get_value(), false);
 #ifdef __PROFILE__
         result.left = left.left;
         result.right = right.right;
@@ -242,19 +259,20 @@ SegmentTree::Node SegmentTree::make(int index) {
 
 using namespace std;
 
-enum Actions {SET = 1, INCREMENT, EVENT_SUM, ODD_SUM};
+enum Actions {
+    SET = 1, INCREMENT, EVENT_SUM, ODD_SUM
+};
 struct Operation {
     int action;
     int first_arg;
     int second_arg;
-} ;
+};
 
 int main() {
 #ifdef __PROFILE__
-    ifstream in("input");
-    cin.rdbuf(in.rdbuf());
+//    ifstream in("input");
+//    cin.rdbuf(in.rdbuf());
 #endif
-
     int n = 0;
     int q = 0;
 
@@ -272,8 +290,12 @@ int main() {
         operations[j] = operation;
     }
 
+#ifdef __PROFILE__
+    using milli = std::chrono::milliseconds;
+    auto start = std::chrono::high_resolution_clock::now();
+#endif // DEBUG
     SegmentTree tree(items);
-
+    int r;
     for (int j = 0; j < q; ++j) {
         Operation operation = operations[j];
         switch (operation.action) {
@@ -284,14 +306,19 @@ int main() {
                 tree.increment(operation.first_arg - 1, operation.second_arg - 1);
                 break;
             case ODD_SUM:
-                cout << tree.odd_sum(operation.first_arg - 1, operation.second_arg - 1) << std::endl;
+//                cout << tree.odd_sum(operation.first_arg - 1, operation.second_arg - 1) << std::endl;
+                r = tree.odd_sum(operation.first_arg - 1, operation.second_arg - 1);
                 break;
             case EVENT_SUM:
-                cout << tree.even_sum(operation.first_arg - 1, operation.second_arg - 1) << std::endl;
+//                cout << tree.even_sum(operation.first_arg - 1, operation.second_arg - 1) << std::endl;
+                r = tree.even_sum(operation.first_arg - 1, operation.second_arg - 1);
                 break;
         }
     }
-
+#ifdef __PROFILE__
+    auto finish = std::chrono::high_resolution_clock::now();
+    std::cout << " TIME: " << std::chrono::duration_cast<milli>(finish - start).count() << " milliseconds\n";
+#endif // DEBUG
 
     return 0;
 }
